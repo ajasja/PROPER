@@ -11,23 +11,21 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 #requirements = ['py3dmol', 'ipywidgets', 'biopython' ]
-requirements = ['py3dmol', 'biopython', 'mdtraj'] # deps can cause trouble in google colab install
+requirements = ['py3dmol', 'biopython', 'mdtraj', 'pandas'] # deps can cause trouble in google colab install
 
 test_requirements = [ ]
 
 setup(
     author="Ajasja Ljubetic",
     author_email='ajasja.ljubetic@ki.si',
-    python_requires='>=3.6',
+    python_requires='>=3.9',
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
     ],
     description="PROPER -- Single-chain permuted proteins for dimerization-based control of protein activity and cellular processes",
     entry_points={

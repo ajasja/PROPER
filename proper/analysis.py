@@ -28,7 +28,7 @@ def get_loops_from_annotation(annot: str, min_length=2, skip_ends=True, loop_cha
     -------
     list of list of list indices
     """
-
+    #TODO add ability for HHHHHLLLLELLLLHHHH -> HHHHHLLLLLLLLLHHHH, so a to short asignation that 
     in_loop = False
     loops = []
 

@@ -94,7 +94,7 @@ class LoopAnalyzer:
         skip_ends=True,
     ):
         self.struct_file_path = struct_file_path
-
+        self.analysis_run = False
         if struct_name is None:  # If no name given take it from the struct file
             struct_name = pathlib.Path(struct_file_path).stem
 
@@ -126,9 +126,12 @@ class LoopAnalyzer:
     resi_feature_descriptions = {}
     feature_descriptions_table = None
 
-    def analyze_structure(self):
+    def analyze_structure(self, forced=False):
         """Analyze the structure"""
 
+        if self.analysis_run and (not forced):
+            return self.residue_features_table
+        
         self.get_loop_features()
 
         self.get_resi_features()
@@ -142,8 +145,19 @@ class LoopAnalyzer:
         self.feature_descriptions_table.update(self.loop_feature_descriptions)
         self.feature_descriptions_table = pd.DataFrame(self.feature_descriptions_table, index=["description"])
         self.feature_descriptions_table = self.feature_descriptions_table.T
-
+        self.analysis_run = True
         return self.residue_features_table
+
+    def suggest_sites(self, filter:str ='resi_burial_percent<50', one_site_per_loop : bool = False):
+        """Function returns the sites for permutation.
+            Filters can be used to filter on loops on residue attributes.
+            one site per loop returns the middle loop index. Return is 0 indexed"""
+        features = self.analyze_structure()
+        q = features.query(filter)
+        if one_site_per_loop:
+            q = q.groupby('loop_index0', group_keys=False).apply(get_middle_loop_row).reset_index(drop=True)
+        return q
+            
 
     def get_loop_features(self):
         self._loop_features = []

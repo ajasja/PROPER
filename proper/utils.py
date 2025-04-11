@@ -95,4 +95,23 @@ def clean_pdb(input_pdb, output_pdb=None):
     ##TODO: check for breaks!
     renumber_residues(output_pdb, output_pdb)
 
+def get_middle_loop_row(group):
+    """
+    Return the middle row of a DataFrame group sorted by 'resi_index0'.
+
+    The DataFrame is first sorted in ascending order by the 'resi_index0' column,
+    and then the middle row is selected. For groups with an even number of rows,
+    the function returns the lower of the two middle rows.
+
+    Parameters:
+        group (pd.DataFrame): A pandas DataFrame containing a 'resi_index0' column.
+
+    Returns:
+        pd.Series: The middle row of the sorted DataFrame as a pandas Series.
+    """
+    sorted_group = group.sort_values(by='resi_index0').reset_index(drop=True)
+    mid_index = len(sorted_group) // 2
+    # For even-sized groups, this returns the lower middle
+    return sorted_group.iloc[mid_index - 1 if len(sorted_group) % 2 == 0 else mid_index]
+
 

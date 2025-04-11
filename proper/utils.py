@@ -27,3 +27,32 @@ def permute_seq_with_linker(seq: str, position0: int, linker: str) -> str:
         raise ValueError("Position must be within the length of the original sequence.")
 
     return seq[position0:] + linker + seq[:position0]
+
+
+from Bio.PDB import PDBParser, PDBIO, Select
+import sys
+
+# Custom Select class to filter only protein atoms of the first chain
+class ProteinFirstChainSelect(Select):
+    def __init__(self, target_chain_id):
+        self.target_chain_id = target_chain_id
+
+    def accept_chain(self, chain):
+        return chain.id == self.target_chain_id
+
+    def accept_residue(self, residue):
+        return residue.id[0] == " "  # " " means it's a standard residue (not water/hetero)
+
+    def accept_atom(self, atom):
+        return True  # Accept all atoms in the residue
+
+def save_first_chain_protein_atoms(input_pdb, output_pdb):
+    parser = PDBParser(QUIET=True)
+    structure = parser.get_structure("structure", input_pdb)
+
+    model = structure[0]  # First model
+    first_chain = next(model.get_chains())  # First chain
+
+    io = PDBIO()
+    io.set_structure(structure)
+    io.save(output_pdb, select=ProteinFirstChainSelect(first_chain.id))

@@ -46,6 +46,36 @@ class ProteinFirstChainSelect(Select):
     def accept_atom(self, atom):
         return True  # Accept all atoms in the residue
 
+def renumber_residues_structure(structure, start_res_id=1):
+    """
+    Renumber residues in a Biopython structure object, starting from start_res_id (default 1).
+    Each chain is renumbered independently.
+
+    Parameters:
+    - structure: Bio.PDB.Structure.Structure
+    - start_res_id: int (default 1)
+
+    Returns:
+    - structure: renumbered Bio.PDB.Structure.Structure object
+    """
+    for model in structure:
+        for chain in model:
+            res_id = start_res_id
+            for residue in chain:
+                old_id = residue.id
+                new_id = (old_id[0], res_id, old_id[2])
+                residue.id = new_id
+                res_id += 1
+    return structure
+
+def renumber_residues(input_pdb, output_pdb):
+    parser = PDBParser(QUIET=True)
+    structure = parser.get_structure("structure", input_pdb)
+    renumber_residues_structure(structure)
+    io = PDBIO()
+    io.set_structure(structure)
+    io.save(output_pdb)
+
 def save_first_chain_protein_atoms(input_pdb, output_pdb):
     parser = PDBParser(QUIET=True)
     structure = parser.get_structure("structure", input_pdb)
@@ -56,3 +86,13 @@ def save_first_chain_protein_atoms(input_pdb, output_pdb):
     io = PDBIO()
     io.set_structure(structure)
     io.save(output_pdb, select=ProteinFirstChainSelect(first_chain.id))
+
+def clean_pdb(input_pdb, output_pdb=None):
+    """Takes the protein atoms of the first chain"""
+    if output_pdb is None:
+        output_pdb = input_pdb
+    save_first_chain_protein_atoms(input_pdb, output_pdb)    
+    ##TODO: check for breaks!
+    renumber_residues(output_pdb, output_pdb)
+
+

@@ -33,6 +33,18 @@ def permute_seq_with_linker(seq: str, position0: int, linker: str) -> str:
 
     return seq[position0:] + linker + seq[:position0]
 
+def file_to_str(file_path):
+    """Loads the contents of a file and returns it as a string.
+
+    Args:
+        file_path: The path to the file.
+
+    Returns:
+        The contents of the file as a string.
+    """
+    with open(file_path, 'r') as f:
+        file_content = f.read()
+    return file_content
 
 # Custom Select class to filter only protein atoms of the first chain
 class ProteinFirstChainSelect(Select):
@@ -163,27 +175,29 @@ def generate_permuted_sequences(construct_name, seq, linkers, positions1, out_fi
         out_file (str): The path to the output file.
 
     Returns:
-        None
+        dict of name and sequence
     """
+    result = {}
     with open(out_file, 'w') as f:
         for pos1 in positions1:
             for linker_name, linker in linkers.items():
                 name = f"{construct_name}{pos1:03d}-{linker_name}"
                 per_seq = permute_seq_with_linker(seq, position0=pos1 - 1, linker=linker)
+                result[name] = per_seq
                 f.write(">" + name + "\n")
                 f.write(per_seq + "\n")
+    return result
 
 
-def file_to_str(file_path):
-    """Loads the contents of a file and returns it as a string.
+def make_dimers_fasta(in_fasta_file, out_fasta_file, chain_sep=':\n'):
+    """Makes dimers in fasta file"""
+    with open(out_fasta_file, 'w') as f:
+        fasta_dict = load_fasta_dictionary(file_to_str(in_fasta_file))
+        for name, seq in fasta_dict.items():
+            f.write('>'+name+'\n')
+            f.write(seq+chain_sep)
+            f.write(seq+'\n')
 
-    Args:
-        file_path: The path to the file.
 
-    Returns:
-        The contents of the file as a string.
-    """
-    with open(file_path, 'r') as f:
-        file_content = f.read()
-    return file_content
+
 

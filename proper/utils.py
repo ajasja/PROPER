@@ -1,6 +1,11 @@
 """
 Utility functions
 """
+import Bio
+from Bio.PDB import PDBParser, PDBIO, Select
+from Bio import SeqIO
+import sys
+from io import StringIO
 
 resname_3to1_dict = {'CYS': 'C', 'ASP': 'D', 'SER': 'S', 'GLN': 'Q', 'LYS': 'K',
      'ILE': 'I', 'PRO': 'P', 'THR': 'T', 'PHE': 'F', 'ASN': 'N', 
@@ -28,9 +33,6 @@ def permute_seq_with_linker(seq: str, position0: int, linker: str) -> str:
 
     return seq[position0:] + linker + seq[:position0]
 
-
-from Bio.PDB import PDBParser, PDBIO, Select
-import sys
 
 # Custom Select class to filter only protein atoms of the first chain
 class ProteinFirstChainSelect(Select):
@@ -114,4 +116,74 @@ def get_middle_loop_row(group):
     # For even-sized groups, this returns the lower middle
     return sorted_group.iloc[mid_index - 1 if len(sorted_group) % 2 == 0 else mid_index]
 
+def is_one_line(string):
+    """
+    Check if a string contains only one line.
+    
+    Args:
+        string (str): The string to check
+        
+    Returns:
+        bool: True if the string contains only one line, False otherwise
+    """
+    # Remove trailing newlines to avoid counting empty lines at the end
+    string = string.rstrip('\n\r')
+    
+    # Check if there are any newline characters in the string
+    return '\n' not in string and '\r' not in string
+
+
+def load_fasta_dictionary(fasta_str):
+    fasta_io = StringIO(fasta_str)
+    fasta_dict={}
+     # Parse the FASTA data using Biopython
+    for record in Bio.SeqIO.parse(fasta_io, "fasta"):
+        # Use the sequence ID as the key and the sequence as the value
+        fasta_dict[record.id] = str(record.seq)
+    return fasta_dict
+    
+    return fasta_dict
+
+def load_fasta_or_single_line(fasta_str, default_name='linker'):
+    if is_one_line(fasta_str):
+        return {default_name: fasta_str}
+    else:  
+        return load_fasta_dictionary(fasta_str)
+        
+
+def generate_permuted_sequences(construct_name, seq, linkers, positions1, out_file):
+    """
+    Generates permuted protein sequences with linkers and writes them to a file.
+
+    Args:
+        construct_name (str): The name of the construct.
+        seq (str): The original protein sequence.
+        linkers (dict): A dictionary of linker names and sequences.
+        positions1 (list): A list of positions for permutation.
+        out_file (str): The path to the output file.
+
+    Returns:
+        None
+    """
+    with open(out_file, 'w') as f:
+        for pos1 in positions1:
+            for linker_name, linker in linkers.items():
+                name = f"{construct_name}{pos1:03d}-{linker_name}"
+                per_seq = permute_seq_with_linker(seq, position0=pos1 - 1, linker=linker)
+                f.write(">" + name + "\n")
+                f.write(per_seq + "\n")
+
+
+def file_to_str(file_path):
+    """Loads the contents of a file and returns it as a string.
+
+    Args:
+        file_path: The path to the file.
+
+    Returns:
+        The contents of the file as a string.
+    """
+    with open(file_path, 'r') as f:
+        file_content = f.read()
+    return file_content
 

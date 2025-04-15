@@ -15,7 +15,7 @@ def resname_3to1(resname3: list) -> str:
 
 def print_pymol_selection(df_with_resi_index0):
     """Returns a pymol selection of resids (counted from 1) from the resi_index0 column"""
-    resids ='+'.join([str(i+1) for i in q.resi_index0])
+    resids ='+'.join([str(i+1) for i in df_with_resi_index0.resi_index0])
     print(f'select resi {resids}')
 
 def permute_seq_with_linker(seq: str, position0: int, linker: str) -> str:

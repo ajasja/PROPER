@@ -189,12 +189,12 @@ def generate_permuted_sequences(construct_name, seq, linkers, positions1, out_fi
     return result
 
 
-def make_dimers_fasta(in_fasta_file, out_fasta_file, chain_sep=':\n'):
+def make_dimers_fasta(in_fasta_file, out_fasta_file, chain_sep=':\n', name_prefix='', name_postfix=''):
     """Makes dimers in fasta file"""
     with open(out_fasta_file, 'w') as f:
         fasta_dict = load_fasta_dictionary(file_to_str(in_fasta_file))
         for name, seq in fasta_dict.items():
-            f.write('>'+name+'\n')
+            f.write(f'>{name_prefix}{name}{name_postfix}\n')
             f.write(seq+chain_sep)
             f.write(seq+'\n')
 

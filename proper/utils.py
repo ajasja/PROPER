@@ -181,7 +181,7 @@ def generate_permuted_sequences(construct_name, seq, linkers, positions1, out_fi
     with open(out_file, 'w') as f:
         for pos1 in positions1:
             for linker_name, linker in linkers.items():
-                name = f"{construct_name}{pos1:03d}-{linker_name}"
+                name = f"{construct_name}-pos{pos1:03d}-{linker_name}"
                 per_seq = permute_seq_with_linker(seq, position0=pos1 - 1, linker=linker)
                 result[name] = per_seq
                 f.write(">" + name + "\n")
